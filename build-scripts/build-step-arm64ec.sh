@@ -97,41 +97,41 @@ do
       --disable-amd_ags_x64 \
       --enable-wineandroid_drv=no \
       --disable-tests \
-      --without-alsa \
+      --with-alsa \
       --without-capi \
       --without-coreaudio \
       --without-cups \
       --without-dbus \
       --without-ffmpeg \
-      --without-fontconfig \
-      --without-freetype \
+      --with-fontconfig \
+      --with-freetype \
       --without-gcrypt \
       --without-gettext \
       --with-gettextpo=no \
       --without-gphoto \
-      --without-gnutls \
+      --with-gnutls \
       --without-gssapi \
-      --without-gstreamer \
+      --with-gstreamer \
       --without-inotify \
       --without-krb5 \
       --without-netapi \
       --without-opencl \
-      --without-opengl \
+      --with-opengl \
       --without-osmesa \
       --without-oss \
       --without-pcap \
       --without-pcsclite \
       --without-piper \
       --with-pthread \
-      --without-pulse \
+      --with-pulse \
       --without-sane \
-      --without-sdl \
+      --with-sdl \
       --without-udev \
       --without-unwind \
       --without-usb \
       --without-v4l2 \
       --without-vosk \
-      --without-vulkan \
+      --with-vulkan \
       --without-wayland \
       --without-xcomposite \
       --without-xcursor \
@@ -140,7 +140,7 @@ do
       --without-xrandr \
       --without-xrender \
       --without-xshape \
-      --without-xshm \
+      --with-xshm \
       --without-xxf86vm
 
     echo "Applying patches..."
