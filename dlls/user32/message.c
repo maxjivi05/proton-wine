@@ -710,7 +710,29 @@ BOOL WINAPI PostThreadMessageA( DWORD thread, UINT msg, WPARAM wparam, LPARAM lp
  */
 BOOL WINAPI DECLSPEC_HOTPATCH PeekMessageW( MSG *msg_out, HWND hwnd, UINT first, UINT last, UINT flags )
 {
-    return NtUserPeekMessage( msg_out, hwnd, first, last, flags );
+    BOOL ret = NtUserPeekMessage( msg_out, hwnd, first, last, flags );
+
+    if (!ret)
+    {
+        static int enabled = -1;
+        if (enabled == -1)
+        {
+            HANDLE env = NtCurrentTeb()->Peb->ProcessParameters->Environment;
+            UNICODE_STRING name = RTL_CONSTANT_STRING( L"WINE_PEEK_LIMITER" );
+            UNICODE_STRING value;
+            if (!RtlQueryEnvironmentVariable_U( env, &name, &value ))
+            {
+                enabled = (value.Length == 2 && value.Buffer[0] == '1') ? 1 : 0;
+                RtlFreeUnicodeString( &value );
+            }
+            else
+                enabled = 0;
+        }
+        if (enabled)
+            NtDelayExecution( FALSE, &(LARGE_INTEGER){ -10000 } );
+    }
+
+    return ret;
 }
 
 
