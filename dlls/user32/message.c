@@ -710,7 +710,26 @@ BOOL WINAPI PostThreadMessageA( DWORD thread, UINT msg, WPARAM wparam, LPARAM lp
  */
 BOOL WINAPI DECLSPEC_HOTPATCH PeekMessageW( MSG *msg_out, HWND hwnd, UINT first, UINT last, UINT flags )
 {
-    return NtUserPeekMessage( msg_out, hwnd, first, last, flags );
+    BOOL ret = NtUserPeekMessage( msg_out, hwnd, first, last, flags );
+
+    if (!ret)
+    {
+        static int delay_ms = -1;
+        if (delay_ms == -1)
+        {
+            char buf[16];
+            if (GetEnvironmentVariableA( "WINE_PEEK_LIMITER", buf, sizeof(buf) ) > 0)
+                delay_ms = atoi( buf );
+            else
+                delay_ms = 0;
+            if (delay_ms < 0) delay_ms = 0;
+            if (delay_ms > 100) delay_ms = 100;
+        }
+        if (delay_ms > 0)
+            Sleep( delay_ms );
+    }
+
+    return ret;
 }
 
 
