@@ -714,15 +714,19 @@ BOOL WINAPI DECLSPEC_HOTPATCH PeekMessageW( MSG *msg_out, HWND hwnd, UINT first,
 
     if (!ret)
     {
-        static int enabled = -1;
-        if (enabled == -1)
+        static int delay_ms = -1;
+        if (delay_ms == -1)
         {
-            char buf[2];
-            enabled = (GetEnvironmentVariableA( "WINE_PEEK_LIMITER", buf, sizeof(buf) ) == 1
-                        && buf[0] == '1') ? 1 : 0;
+            char buf[16];
+            if (GetEnvironmentVariableA( "WINE_PEEK_LIMITER", buf, sizeof(buf) ) > 0)
+                delay_ms = atoi( buf );
+            else
+                delay_ms = 0;
+            if (delay_ms < 0) delay_ms = 0;
+            if (delay_ms > 100) delay_ms = 100;
         }
-        if (enabled)
-            Sleep( 1 );
+        if (delay_ms > 0)
+            Sleep( delay_ms );
     }
 
     return ret;
