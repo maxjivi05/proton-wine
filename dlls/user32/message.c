@@ -26,8 +26,6 @@
 #include "dde.h"
 #include "wine/debug.h"
 #include "wine/exception.h"
-#include <stdlib.h>
-#include <unistd.h>
 
 WINE_DEFAULT_DEBUG_CHANNEL(msg);
 
@@ -719,11 +717,12 @@ BOOL WINAPI DECLSPEC_HOTPATCH PeekMessageW( MSG *msg_out, HWND hwnd, UINT first,
         static int enabled = -1;
         if (enabled == -1)
         {
-            const char *env = getenv( "WINE_PEEK_LIMITER" );
-            enabled = (env && env[0] == '1' && env[1] == '\0') ? 1 : 0;
+            char buf[2];
+            enabled = (GetEnvironmentVariableA( "WINE_PEEK_LIMITER", buf, sizeof(buf) ) == 1
+                        && buf[0] == '1') ? 1 : 0;
         }
         if (enabled)
-            usleep( 1000 );
+            Sleep( 1 );
     }
 
     return ret;
