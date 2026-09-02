@@ -26,6 +26,8 @@
 #include "dde.h"
 #include "wine/debug.h"
 #include "wine/exception.h"
+#include <stdlib.h>
+#include <unistd.h>
 
 WINE_DEFAULT_DEBUG_CHANNEL(msg);
 
