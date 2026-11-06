@@ -1480,6 +1480,28 @@ static unsigned char *pe_rva( const struct pe_image *pe, unsigned int rva, unsig
     return NULL;
 }
 
+static int pe_cover_rva( const struct pe_image *pe, unsigned int rva, unsigned int len, unsigned int align )
+{
+    unsigned int i;
+
+    for (i = 0; i < pe->nb_sections; i++)
+    {
+        unsigned char *sec = pe->sections + i * 40;
+        unsigned int vsize = pe_dword( sec + 8 ), va = pe_dword( sec + 12 ), raw_size = pe_dword( sec + 16 );
+        unsigned int end = rva - va + len;
+
+        if (rva < va || rva - va >= raw_size) continue;
+        if (end <= vsize) return 1;
+        if (end > raw_size || !align || end > ((vsize + align - 1) & ~(align - 1))) return 0;
+        sec[8] = end;
+        sec[9] = end >> 8;
+        sec[10] = end >> 16;
+        sec[11] = end >> 24;
+        return 1;
+    }
+    return 0;
+}
+
 static int arm64x_fixup( const struct pe_image *pe, unsigned int rva, unsigned int *value )
 {
     unsigned int pos, end;
@@ -1650,6 +1672,7 @@ static unsigned int fixup_arm64x_import_thunks( unsigned char *data, size_t size
         rel = (int)pe_dword( code + 2 );
         target = func + 6 + rel;
         if (!is_import_slot( &pe, dirs, target )) continue;
+        if (!pe_cover_rva( &pe, func, sizeof(hotpatch) + 6, pe_dword( data + opt + 32 ) )) continue;
 
         rel -= sizeof(hotpatch);
         memcpy( code, hotpatch, sizeof(hotpatch) );
